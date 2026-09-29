@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NetZero — Monitoramento de emissões de carbono</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050805;--panel:#0d130d;--line:#1d2b1d;--g:#2bff88;--g2:#12a555;--tx:#e8f2e8;--mut:#8fa58f;--warn:#ffb020;--bad:#ff4d4d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.65 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:Sora,system-ui,sans-serif;line-height:1.15;margin:0}
+a{color:var(--g)}
+.w{max-width:1040px;margin:0 auto;padding:0 20px}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:#050805ee;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+nav .w{display:flex;align-items:center;justify-content:space-between;height:56px;gap:12px}
+nav b{font:800 20px Sora,sans-serif}nav b span{color:var(--g)}
+nav div{display:flex;gap:16px;overflow-x:auto;font-size:14px}nav a{color:var(--mut);text-decoration:none;white-space:nowrap}nav a:hover{color:var(--g)}
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+h2{font-size:clamp(26px,4vw,38px);margin-bottom:12px}
+.lead{color:var(--mut);max-width:64ch;margin:0 0 32px}
+.hero{padding:64px 0 56px;background:radial-gradient(700px 300px at 80% 0,#0f3d1f55,transparent)}
+.hero h1{font-size:clamp(34px,6vw,60px);font-weight:800;max-width:14ch}
+.hero h1 em{font-style:normal;color:var(--g)}
+.hero p{color:var(--mut);max-width:58ch;margin:18px 0 26px}
+.btn{display:inline-block;background:var(--g);color:#031a0c;font-weight:600;padding:12px 20px;border-radius:8px;text-decoration:none;margin-right:8px;border:0;font-size:15px;cursor:pointer;font-family:inherit}
+.btn.o{background:none;color:var(--g);border:1px solid var(--g2)}
+.btn:focus-visible,input:focus-visible,select:focus-visible,.step:focus-visible{outline:2px solid var(--g);outline-offset:2px}
+.live{margin-top:36px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.live small{color:var(--mut)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--g);margin-right:6px;animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){.dot{animation:none}html{scroll-behavior:auto}}
+svg.ch{width:100%;height:auto;display:block}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;cursor:pointer;text-align:left;color:var(--tx);font:inherit}
+.step b{display:block;font-family:Sora;margin-bottom:4px}.step span{font-size:13px;color:var(--mut)}
+.step.on{border-color:var(--g);box-shadow:0 0 0 1px var(--g) inset}
+#stepInfo{margin-top:14px;background:#0b1f11;border-left:3px solid var(--g);padding:14px 16px;border-radius:6px}
+.pkt{position:relative;height:6px;background:var(--line);border-radius:3px;margin:20px 0 4px;overflow:hidden}
+.pkt i{position:absolute;top:0;left:-10%;width:10%;height:100%;background:var(--g);animation:mv 2.2s linear infinite}
+@keyframes mv{to{left:100%}}
+@media(prefers-reduced-motion:reduce){.pkt i{animation:none;left:45%}}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card h3{font-size:17px;margin-bottom:10px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{background:none;border:1px solid var(--line);color:var(--mut);padding:6px 12px;border-radius:20px;cursor:pointer;font:inherit;font-size:14px}
+.tab.on{background:var(--g);color:#031a0c;border-color:var(--g)}
+.big{font:800 34px Sora;color:var(--g)}.big.warn{color:var(--warn)}.big.bad{color:var(--bad)}
+.ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;font-size:14px}
+input[type=range]{accent-color:var(--g);flex:1;min-width:120px}
+#log{list-style:none;padding:0;margin:0;max-height:230px;overflow:auto;font-size:14px}
+#log li{padding:8px 0;border-bottom:1px solid var(--line)}
+#log .a{color:var(--bad)}#log .o{color:var(--g)}
+.sens{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.sens div{background:#0a100a;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;color:var(--mut)}
+.sens b{display:block;color:var(--tx);font:600 20px Sora}
+.sens .bad{border-color:var(--bad)}.sens .bad b{color:var(--bad)}
+.sim2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+label{display:block;font-size:14px;color:var(--mut);margin-top:12px}label b{color:var(--g)}
+.bar{height:16px;background:var(--line);border-radius:8px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--g2),var(--g));transition:width .3s}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.cols .card p{margin:0;color:var(--mut);font-size:15px}
+footer{padding:36px 0;color:var(--mut);font-size:14px}
+@media(max-width:760px){.flow,.cols{grid-template-columns:1fr 1fr}.grid,.sim2{grid-template-columns:1fr}.sens{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.flow,.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav><div class="w"><b>Net<span>Zero</span></b><div><a href="#como">Como funciona</a><a href="#painel">Simulador do painel</a><a href="#meta">Simulador de redução</a><a href="#impacto">Impacto</a></div></div></nav>
+
+<header class="hero"><div class="w">
+<h1>Dados que ajudam a reduzir <em>emissões</em>.</h1>
+<p>A NetZero é um projeto SENAI de tecnologia e sustentabilidade. Sensores instalados em pontos estratégicos medem as emissões de gases de empresas, principalmente de petróleo e gás, e mostram tudo em um painel com alertas em tempo real.</p>
+<a class="btn" href="#painel">Testar o simulador</a><a class="btn o" href="#como">Entender o sistema</a>
+<div class="live"><div><span class="dot"></span><small>Leitura simulada de um sensor de metano (CH₄), atualizada a cada segundo</small></div>
+<svg class="ch" id="heroChart" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="Gráfico de leituras simuladas"></svg></div>
+</div></header>
+
+<section id="como"><div class="w">
+<h2>Como a NetZero funciona</h2>
+<p class="lead">O caminho do dado tem quatro etapas. Clique em cada uma para ver o que acontece.</p>
+<div class="flow" role="tablist">
+<button class="step on" data-i="0"><b>1. Sensores</b><span>Medem os gases</span></button>
+<button class="step" data-i="1"><b>2. Transmissão</b><span>Enviam pela internet</span></button>
+<button class="step" data-i="2"><b>3. Servidor</b><span>Guarda e analisa</span></button>
+<button class="step" data-i="3"><b>4. Painel</b><span>Mostra e alerta</span></button>
+</div>
+<div class="pkt" aria-hidden="true"><i></i></div>
+<div id="stepInfo"></div>
+</div></section>
+
+<section id="painel"><div class="w">
+<h2>Simulador do painel de monitoramento</h2>
+<p class="lead">Este é um painel de teste com dados fictícios. Escolha o gás, ajuste o limite de alerta e simule um vazamento para ver como o sistema detecta a mudança fora do padrão.</p>
+<div class="sens" id="sens"></div>
+<div class="grid">
+<div class="card"><h3>Leitura em tempo real</h3>
+<div class="tabs" id="tabs"></div>
+<div><span class="big" id="val">—</span> <small id="unit" style="color:var(--mut)"></small></div>
+<svg class="ch" id="chart" viewBox="0 0 600 220" preserveAspectRatio="none" role="img" aria-label="Gráfico da leitura do sensor selecionado"></svg>
+<div class="ctl"><label style="margin:0" for="lim">Limite de alerta: <b id="limv"></b></label><input type="range" id="lim" min="20" max="100" value="60"></div>
+<div class="ctl"><button class="btn" id="leak">Simular vazamento</button><button class="btn o" id="fix">Corrigir falha</button></div>
+</div>
+<div class="card"><h3>Alertas</h3><ul id="log"><li class="o">Sistema iniciado. Aguardando leituras…</li></ul></div>
+</div>
+</div></section>
+
+<section id="meta"><div class="w">
+<h2>Simulador de redução de emissões</h2>
+<p class="lead">Com os dados do painel, a empresa define metas. Ajuste os valores e veja quanto CO₂ deixaria de ser emitido.</p>
+<div class="sim2">
+<div class="card"><h3>Parâmetros</h3>
+<label for="base">Emissão atual da unidade: <b id="baseV"></b> t CO₂e/ano</label><input type="range" id="base" min="1000" max="100000" step="1000" value="40000">
+<label for="red">Redução por correções operacionais: <b id="redV"></b>%</label><input type="range" id="red" min="0" max="60" value="20">
+<label for="yrs">Prazo: <b id="yrsV"></b> anos</label><input type="range" id="yrs" min="1" max="10" value="5">
+</div>
+<div class="card"><h3>Resultado</h3>
+<div class="big" id="r1"></div><small style="color:var(--mut)">deixam de ser emitidas por ano</small>
+<div class="bar"><i id="bar"></i></div>
+<p id="r2" style="margin:14px 0 0"></p>
+</div></div>
+</div></section>
+
+<section id="impacto"><div class="w">
+<h2>Por que isso importa</h2>
+<p class="lead">A NetZero transforma dados em decisões para processos industriais mais eficientes e sustentáveis.</p>
+<div class="cols">
+<div class="card"><h3>Enxergar</h3><p>Emissões que antes eram estimadas passam a ser medidas continuamente.</p></div>
+<div class="card"><h3>Reagir</h3><p>Alertas avisam sobre valores fora do padrão, como um possível vazamento.</p></div>
+<div class="card"><h3>Reduzir</h3><p>Com histórico e análise, a empresa corrige falhas e define metas realistas.</p></div>
+</div>
+</div></section>
+
+<footer><div class="w">Projeto NetZero · SENAI. Todos os dados desta página são simulações para demonstração.</div></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+// Etapas
+const steps=[
+["Sensores","Ficam em pontos estratégicos da operação, como tubulações, válvulas e chaminés. Eles medem a concentração de gases como metano (CH₄), dióxido de carbono (CO₂) e sulfeto de hidrogênio (H₂S)."],
+["Transmissão","Cada leitura é enviada pela internet, junto com o horário e o local do sensor. Assim os dados chegam ao servidor sem que ninguém precise coletá-los manualmente."],
+["Servidor","Recebe, armazena e analisa os dados. Ele compara cada valor com o histórico e com os limites definidos, e identifica alterações fora do padrão."],
+["Painel (dashboard)","Mostra os níveis de emissão em gráficos e envia alertas sobre possíveis problemas. A equipe usa essas informações para corrigir falhas e reduzir o impacto ambiental."]];
+document.querySelectorAll('.step').forEach(b=>b.onclick=()=>{document.querySelectorAll('.step').forEach(x=>x.classList.remove('on'));b.classList.add('on');show(+b.dataset.i)});
+function show(i){$('stepInfo').innerHTML='<b>'+steps[i][0]+'</b><br>'+steps[i][1]}show(0);
+
+// Simulador do painel
+const gases=[{n:"CH₄",u:"ppm",b:35,name:"Metano"},{n:"CO₂",u:"ppm×10",b:45,name:"Dióxido de carbono"},{n:"H₂S",u:"ppm",b:20,name:"Sulfeto de hidrogênio"}];
+const N=50,hist=gases.map(g=>Array(N).fill(g.b));let cur=0,leak=false,lim=60,alerted=[false,false,false],hero=Array(N).fill(35);
+gases.forEach((g,i)=>{const t=document.createElement('button');t.className='tab'+(i?'':' on');t.textContent=g.n+' · '+g.name;t.onclick=()=>{cur=i;document.querySelectorAll('.tab').forEach((x,j)=>x.classList.toggle('on',j==i));draw()};$('tabs').appendChild(t)});
+function line(a,w,h,l,top){const p=a.map((v,i)=>(i/(N-1)*w).toFixed(1)+','+(h-v/120*h).toFixed(1)).join(' ');
+return (l!=null?'<line x1="0" x2="'+w+'" y1="'+(h-l/120*h)+'" y2="'+(h-l/120*h)+'" stroke="#ffb020" stroke-dasharray="6 5" stroke-width="1.5"/>':'')+'<polyline points="'+p+'" fill="none" stroke="#2bff88" stroke-width="2.5" vector-effect="non-scaling-stroke"/>'}
+function log(t,c){const li=document.createElement('li');li.className=c;li.textContent=new Date().toLocaleTimeString('pt-BR')+' — '+t;$('log').prepend(li);while($('log').children.length>30)$('log').lastChild.remove()}
+function draw(){const g=gases[cur],v=hist[cur][N-1];$('val').textContent=v.toFixed(1);$('val').className='big'+(v>lim?' bad':v>lim*.8?' warn':'');$('unit').textContent=g.u;
+$('chart').innerHTML=line(hist[cur],600,220,lim);
+$('sens').innerHTML=gases.map((g,i)=>{const x=hist[i][N-1];return '<div class="'+(x>lim?'bad':'')+'">'+g.name+'<b>'+x.toFixed(1)+' '+g.u+'</b>'+(x>lim?'Acima do limite':'Normal')+'</div>'}).join('');
+$('heroChart').innerHTML=line(hero,600,120,null)}
+function tick(){gases.forEach((g,i)=>{let t=g.b+(Math.random()-.5)*8;if(leak&&i==0)t=g.b+55+Math.random()*12;const p=hist[i][N-1];const v=Math.max(0,p+(t-p)*.35);hist[i].push(v);hist[i].shift();
+const over=v>lim;if(over&&!alerted[i]){alerted[i]=true;log('ALERTA: '+g.name+' ('+g.n+') em '+v.toFixed(1)+', acima do limite de '+lim+'.','a')}
+if(!over&&alerted[i]){alerted[i]=false;log(g.name+' voltou ao normal.','o')}});
+hero.push(Math.max(0,hero[N-1]+(35+(Math.random()-.5)*12-hero[N-1])*.4));hero.shift();draw()}
+$('lim').oninput=e=>{lim=+e.target.value;$('limv').textContent=lim;draw()};$('limv').textContent=lim;
+$('leak').onclick=()=>{leak=true;log('Vazamento simulado no sensor de metano.','a')};
+$('fix').onclick=()=>{if(leak){leak=false;log('Falha corrigida pela equipe de manutenção.','o')}};
+setInterval(tick,1000);tick();
+
+// Simulador de redução
+function calc(){const b=+$('base').value,r=+$('red').value,y=+$('yrs').value;
+$('baseV').textContent=b.toLocaleString('pt-BR');$('redV').textContent=r;$('yrsV').textContent=y;
+const s=b*r/100;$('r1').textContent=s.toLocaleString('pt-BR')+' t';$('bar').style.width=Math.min(100,r/60*100)+'%';
+$('r2').innerHTML='Em <b>'+y+' anos</b>, a unidade evitaria cerca de <b>'+(s*y).toLocaleString('pt-BR')+' t</b> de CO₂e. A emissão anual cairia de '+b.toLocaleString('pt-BR')+' para '+(b-s).toLocaleString('pt-BR')+' t.'}
+['base','red','yrs'].forEach(i=>$(i).oninput=calc);calc();
+</script>
+</body>
+</html>
